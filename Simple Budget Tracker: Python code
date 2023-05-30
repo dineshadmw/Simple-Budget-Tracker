@@ -1,0 +1,108 @@
+# Simple-Budget-Tracker
+import csv
+import datetime
+
+csv_file_name = "account_records.csv"
+
+# Defining AccountEntry class and adding constructor method
+class AccountEntry:
+    def __init__(self, title, amount, entry_type, date):
+        self.title = title
+        self.amount = amount
+        self.entry_type = entry_type
+        self.date = date
+
+# Method to validate date input
+def validate_date(input_value):
+    try:
+        datetime.date.fromisoformat(input_value)
+        return True
+    except ValueError:
+        return False
+
+# Method to validate numper input
+def validate_number(input_value):
+    if input_value.strip().isdigit():
+        return True
+    else:
+        return False
+
+# Method to write a record into csv file
+def write_record_to_csv(record):
+    with open(csv_file_name, 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([record.title, record.amount, record.entry_type, record.date])
+    file.close()
+
+# Method to create an AccountEntry object upon user input, and pass it to write_record_to_csv method
+def add_record():
+    record = None
+    while True:
+        title = input("Please enter entry title: ")
+        if title != "":
+            break
+        else:
+            print("Invalid input")
+    while True:
+        amount = input("Please enter entry amount: ")
+        if validate_number(amount):
+            break
+        else:
+            print("Invalid input")
+    while True:
+        entry_type = input("Please enter entry type. (valid types: income, expense): ")
+        if entry_type == "income" or entry_type == "expense":
+            break
+        else:
+            print("Invalid input")
+    while True:
+        date = input("Please enter enter entry date. (in YYYY-MM-DD format): ")
+        if validate_date(date):
+            break
+        else:
+            print("Invalid input")
+    record = AccountEntry(title, amount, entry_type, date)
+    write_record_to_csv(record)
+
+# Method to read the csv and print all the entries upon user request
+def view_all_entries():
+    with open(csv_file_name, 'r') as file:
+        csv_reader = csv.reader(file)
+        line_count = 0
+        for row in csv_reader:
+            print(f"Entry No: {line_count + 1}\n")
+            print(f"Title: {row[0]}\n")
+            print(f"Amount: {row[1]}\n")
+            print(f"Type: {row[2]}\n")
+            print(f"Date: {row[3]}\n\n")
+            line_count += 1
+        print(f'Total: {line_count} entries.')
+    file.close()
+
+# Method to read the csv, calculate the account balance and display it upon user request
+def display_account_balance():
+    account_balance = 0
+    with open(csv_file_name, 'r') as file:
+        csv_reader = csv.reader(file)
+        line_count = 0
+        for row in csv_reader:
+            if(row[2] == "income"):
+                account_balance += float(row[1])
+            elif(row[2] == "expense"):
+                account_balance -= float(row[1])
+        print(f'Account Balance is: {account_balance}')
+    file.close()
+
+# Main input loop that runs until user quits
+while True:
+    main_command = input("Please choose one of the following options. [q] to quit, [a] to add new entry, [p] print the total account balance, [v] to view all previous entries: ")
+    if main_command == "q":
+        break
+    elif (main_command == "a"):
+        add_record()
+    elif (main_command == "p"):
+        display_account_balance()
+    elif (main_command == "v"):
+        view_all_entries()
+    else:
+        print("invalid response")
